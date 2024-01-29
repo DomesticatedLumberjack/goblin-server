@@ -6,7 +6,7 @@ import (
 
 func main() {
 	server := Server{
-		upgrader: websocket.Upgrader{},
+		Upgrader: websocket.Upgrader{},
 	}
 
 	err := server.Run()

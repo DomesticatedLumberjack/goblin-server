@@ -7,17 +7,17 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-const maxUint64 = ^uint64(0) //Change this to guid later
+const maxUint64 = ^uint64(0) //Maybe change this to guid later
 
 type Server struct {
-	upgrader          websocket.Upgrader
-	connectionCounter uint64
+	Upgrader          websocket.Upgrader
+	ConnectionCounter uint64
 	RoomManager       *RoomManager
 }
 
 func (s *Server) Run() error {
 	s.RoomManager = NewRoomManager()
-	s.upgrader = websocket.Upgrader{
+	s.Upgrader = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
@@ -39,7 +39,7 @@ func (s *Server) Run() error {
 
 func (s *Server) handleSocket(w http.ResponseWriter, r *http.Request) {
 	//Upgrade to websocket
-	conn, err := s.upgrader.Upgrade(w, r, nil)
+	conn, err := s.Upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Print("upgrade failed: ", err)
 		return
@@ -47,11 +47,11 @@ func (s *Server) handleSocket(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 
 	//Handle assigning ids
-	connId := s.connectionCounter
-	if s.connectionCounter == maxUint64 {
-		s.connectionCounter = 0
+	connId := s.ConnectionCounter
+	if s.ConnectionCounter == maxUint64 {
+		s.ConnectionCounter = 0
 	} else {
-		s.connectionCounter++
+		s.ConnectionCounter++
 	}
 	log.Println("Connection opened by:", connId)
 
@@ -81,8 +81,6 @@ func (s *Server) handleSocket(w http.ResponseWriter, r *http.Request) {
 		default:
 			s.handleError(conn, connId, ErrInvalidCommand{})
 		}
-
-		log.Println("Current Games:", s.RoomManager.rooms)
 	}
 }
 

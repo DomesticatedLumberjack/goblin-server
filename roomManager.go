@@ -18,18 +18,18 @@ func genCode() string {
 }
 
 type RoomManager struct {
-	rooms map[string]*Room[DisasterMasterData]
+	Rooms map[string]*Room[DisasterMasterData]
 }
 
 func NewRoomManager() *RoomManager {
 	return &RoomManager{
-		rooms: make(map[string]*Room[DisasterMasterData]),
+		Rooms: make(map[string]*Room[DisasterMasterData]),
 	}
 }
 
 func (g *RoomManager) NewRoom(hostConn *websocket.Conn, hostId uint64, roomData DisasterMasterData) *Room[DisasterMasterData] {
 	code := genCode()
-	g.rooms[code] = &Room[DisasterMasterData]{
+	g.Rooms[code] = &Room[DisasterMasterData]{
 		Code:     code,
 		HostId:   hostId,
 		HostConn: hostConn,
@@ -37,28 +37,28 @@ func (g *RoomManager) NewRoom(hostConn *websocket.Conn, hostId uint64, roomData 
 		RoomData: roomData,
 	}
 
-	return g.rooms[code]
+	return g.Rooms[code]
 }
 
 func (g *RoomManager) RemoveRoom(code string) {
-	delete(g.rooms, code)
+	delete(g.Rooms, code)
 }
 
 func (g *RoomManager) JoinRoom(code string, conn *websocket.Conn, id uint64, goblin Goblin) error {
 	// Check if the room exists
-	_, ok := g.rooms[code]
+	_, ok := g.Rooms[code]
 	if !ok {
 		return ErrRoomNotFound{}
 	}
 
 	// Check if the client is already in the room
-	for _, client := range g.rooms[code].Clients {
+	for _, client := range g.Rooms[code].Clients {
 		if client.Id == id {
 			return nil
 		}
 	}
 
-	// Remove the client from any existing rooms
+	// Remove the client from any existing Rooms
 	g.RemoveClient(id)
 
 	client := Client[Goblin]{
@@ -67,12 +67,12 @@ func (g *RoomManager) JoinRoom(code string, conn *websocket.Conn, id uint64, gob
 		PlayerData: goblin,
 	}
 
-	g.rooms[code].Clients = append(g.rooms[code].Clients, client)
+	g.Rooms[code].Clients = append(g.Rooms[code].Clients, client)
 	return nil
 }
 
 func (g *RoomManager) RemoveClient(id uint64) {
-	for _, room := range g.rooms {
+	for _, room := range g.Rooms {
 		for i, client := range room.Clients {
 			if client.Id == id {
 				room.Clients = append(room.Clients[:i], room.Clients[i+1:]...)
@@ -85,7 +85,7 @@ func (g *RoomManager) RemoveClient(id uint64) {
 
 // Lol
 func (g *RoomManager) GetRoom(code string) (*Room[DisasterMasterData], error) {
-	room, ok := g.rooms[code]
+	room, ok := g.Rooms[code]
 	if !ok {
 		return nil, ErrRoomNotFound{}
 	}
