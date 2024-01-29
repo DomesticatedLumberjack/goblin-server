@@ -1,7 +1,16 @@
 package main
 
-import "fmt"
+import (
+	"github.com/gorilla/websocket"
+)
 
 func main() {
-	fmt.Println("Hello world!")
+	server := Server{
+		upgrader: websocket.Upgrader{},
+	}
+
+	err := server.Run()
+	if err != nil {
+		panic(err)
+	}
 }
